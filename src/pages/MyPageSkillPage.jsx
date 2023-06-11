@@ -9,7 +9,7 @@ import Button from '../components/Button';
 const MyPageEdit = () => {
   const [skill, setSkill] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('');
-  const [mySkillList, setMySkillList] = useState([]);
+  const [mySkillList, setMySkillList] = useState(['123', '235']);
   const [skillList, setSkillList] = useState([]); // 검색된 스킬 목록
 
   const navigate = useNavigate();
@@ -31,10 +31,10 @@ const MyPageEdit = () => {
 
   const fetchMySkillList = async () => {
     try {
-      const userToken = sessionStorage.getItem('userToken');
       const response = await fetch('http://15.164.221.244:5000/api/skills/myskill', {
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
         },
       });
       if (response) {
@@ -50,10 +50,10 @@ const MyPageEdit = () => {
 
   const fetchSkillList = async () => {
     try {
-      const userToken = sessionStorage.getItem('userToken');
       const response = await fetch(`http://15.164.221.244:5000/api/skills?keyword=${skill}`, {
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
         },
       });
       if (response) {
@@ -64,6 +64,7 @@ const MyPageEdit = () => {
             label: item.name,
           }));
           setSkillList(updatedList);
+          setSelectedSkill(updatedList[0].value);
         } else {
           setSkillList([]);
         }
@@ -74,7 +75,10 @@ const MyPageEdit = () => {
   };
 
   const handleSkillChange = (e) => {
+    console.log(e.target);
     const selectedOption = e.target.value;
+    console.log(selectedOption);
+
     setSelectedSkill(selectedOption);
   };
 
@@ -92,14 +96,17 @@ const MyPageEdit = () => {
 
   const handleUpdateSkill = async () => {
     try {
-      const userToken = sessionStorage.getItem('userToken');
+      const requestBody = {
+        skillNames: mySkillList,
+      };
+
       const response = await fetch('http://15.164.221.244:5000/api/skills/update', {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
         },
-        body: JSON.stringify(mySkillList),
+        body: JSON.stringify(requestBody),
       });
 
       if (response) {

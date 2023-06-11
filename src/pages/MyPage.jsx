@@ -21,17 +21,7 @@ const MyPage = () => {
     }).then((response) => response.json())
   );
 
-  if (mainProfileDataQuery.isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (mainProfileDataQuery.isError) {
-    return <div>Error: {mainProfileDataQuery.error.message}</div>;
-  }
-
-  // console.log(mainProfileDataQuery.data);
-
-  const { data: mainProfileData } = mainProfileDataQuery;
+  const mainProfileData = mainProfileDataQuery.data;
 
   return (
     <MyPageContainer>
@@ -57,7 +47,6 @@ const MyPageContainer = styled.div`
   position: relative;
   display: flex;
   justify-content: space-between;
-
   max-width: 1024px;
   padding-top: 60px;
   margin: 0 auto;

@@ -15,6 +15,10 @@ const Login = () => {
   const [showLittleText, setShowLittleText] = useState(false);
   const navigate = useNavigate();
 
+  const handleLogin = async () => {
+    await loginMutation.mutateAsync();
+  };
+
   useEffect(() => {
     if (sessionStorage.getItem('userToken')) {
       navigate('/community/post/free');
@@ -67,10 +71,6 @@ const Login = () => {
       },
     }
   );
-
-  const handleLogin = async () => {
-    await loginMutation.mutateAsync();
-  };
 
   return (
     <LoginContainer>

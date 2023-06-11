@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import * as Style from './styledComponents/MyPageProfileStyle';
@@ -28,6 +28,31 @@ const ProfileList = () => {
     },
   ];
   const [mySkillList, setMySkillList] = useState(['React', 'JavaScript', 'TypeScript']);
+
+  useEffect(() => {
+    fetchMySkillList();
+  }, []);
+
+  // console.log(mySkillList);
+
+  const fetchMySkillList = async () => {
+    try {
+      const response = await fetch('http://15.164.221.244:5000/api/skills/myskill', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+        },
+      });
+      if (response) {
+        const data = await response.json();
+        setMySkillList(data);
+      } else {
+        throw new Error('Failed to fetch mySkillList');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const [myEduList, setMyEduList] = useState([
     {
       eduName: '멋쟁이토끼처럼',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
 import * as Style from './styledComponents/MyPageProfileStyle';
@@ -45,7 +45,19 @@ const MainProfile = ({ mainProfileData }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('userToken')) {
+      navigate('/login');
+    }
+  }, []);
+
+  if (!mainProfileData) {
+    return null;
+  }
+
   console.log(mainProfileData);
+
   return (
     <Style.introContainer>
       <div className='imgAndButtons'>

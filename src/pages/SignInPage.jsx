@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginContainer from '../logIn/LogInContainer';
 import Headline from '../logIn/Headline';
@@ -13,6 +13,8 @@ const Signin = () => {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showLittleText, setShowLittleText] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const signinMutation = useMutation(async () => {
@@ -33,17 +35,41 @@ const Signin = () => {
 
     const responseData = await response.json();
     console.log(responseData);
+
+    if (response.ok) {
+      return responseData;
+    } else {
+      throw new Error(responseData.message);
+    }
   });
 
   const handleSignin = async () => {
+    // 이메일 형식 및 비밀번호 유효성 검사
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+    if (!emailRegex.test(email) || !passwordRegex.test(password)) {
+      setErrorMessage('이메일과 비밀번호 형식을 확인해 주세요!');
+      return;
+    }
     await signinMutation.mutateAsync();
   };
 
+  useEffect(() => {
+    if (errorMessage) {
+      setShowLittleText(true);
+      const timer = setTimeout(() => {
+        setErrorMessage('');
+        setShowLittleText(false);
+      }, 1500);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [errorMessage]);
+
   if (signinMutation.isSuccess) {
     navigate('/login');
-  }
-  if (signinMutation.isError) {
-    console.log(signinMutation.error);
   }
 
   return (
@@ -79,12 +105,17 @@ const Signin = () => {
         <LoginButton color='darkPurple' value='회원가입' onClick={handleSignin} />
       </SigninAccordion>
 
-      <LittleText
-        text='이미 회원이신가요? 로그인하기'
-        onClick={() => {
-          navigate('/login');
-        }}
-      />
+      {showLittleText ? (
+        <LittleText wiggle text={errorMessage} />
+      ) : (
+        <LittleText
+          wiggle
+          text='이미 회원이신가요? 로그인하기'
+          onClick={() => {
+            navigate('/login');
+          }}
+        />
+      )}
     </LoginContainer>
   );
 };
