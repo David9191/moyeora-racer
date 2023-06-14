@@ -1,8 +1,49 @@
 import * as Style from './styledComponents/MyPagePostStyle';
+import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 const URL = process.env.REACT_APP_URL;
 
 const MyPostList = () => {
+  const navigate = useNavigate();
+  const [myPostListData, setMyPostListData] = useState([
+    {
+      title: '미쳐버린 제목',
+      content:
+        '유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다! 유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다! 유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다!',
+      comment_cnt: 5,
+      like_cnt: 60,
+      view_cnt: 100,
+    },
+    {
+      title: '맛깔나는 제목',
+      content:
+        '재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다! 재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다! 재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다!',
+      comment_cnt: 5,
+      like_cnt: 60,
+      view_cnt: 100,
+    },
+    {
+      title: '정신나간 제목',
+      content:
+        '멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다! 멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다! 멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다!',
+      comment_cnt: 5,
+      like_cnt: 60,
+      view_cnt: 100,
+    },
+  ]);
+
+  // 유저가 쓴 글 가져오기
+  // const myPostListDataQuery = useQuery('myPostListData', () =>
+  //   fetch(`${URL}/api/users/mypage/board`, {
+  //     headers: {
+  //       Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+  //     },
+  //   }).then((response) => response.json())
+  // );
+
+  // const myPostListData = myPostListDataQuery.data;
+
   // mainProfileData (유저 프로필 정보) 가져오기
   const mainProfileDataQuery = useQuery('mainProfileData', () =>
     fetch(`${URL}/api/users/mypage`, {
@@ -13,6 +54,12 @@ const MyPostList = () => {
   );
 
   const mainProfileData = mainProfileDataQuery.data;
+
+  // const handleViewPostDetail = (id) => {
+  //   navigate(`/community/${id}`);
+  // };
+
+  // onClick={handleViewPostDetail(item.id)} 이거 <li> 안에 넣기
 
   return (
     <Style.ListContainer>
@@ -33,10 +80,10 @@ const MyPostList = () => {
             </div>
 
             <div className='comment-like-view-container'>
-              <p>댓글 {item.comment}</p>
+              <p>댓글 {item.comment_cnt}</p>
               <div>
-                <p>좋아요 {item.like}</p>
-                <p>조회 {item.view} </p>
+                <p>좋아요 {item.like_cnt}</p>
+                <p>조회 {item.view_cnt} </p>
               </div>
             </div>
           </li>
@@ -55,30 +102,3 @@ const MyPageProfile = ({ mainProfileData }) => {
 };
 
 export default MyPageProfile;
-
-const myPostListData = [
-  {
-    title: '미쳐버린 제목',
-    content:
-      '유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다! 유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다! 유익함이 폭발한다 개발자라면 이제는 꼭 알아야 하는 내용ㅋㅋ 이걸 모르는 개발자가 타이어보다 싸다!',
-    comment: 5,
-    like: 60,
-    view: 100,
-  },
-  {
-    title: '맛깔나는 제목',
-    content:
-      '재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다! 재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다! 재미가 폭발한다 개발자라면 이제는 꼭 맛봐야 하는 내용ㅋㅋ 이걸 모르는 개발자가 신발보다 싸다!',
-    comment: 5,
-    like: 60,
-    view: 100,
-  },
-  {
-    title: '정신나간 제목',
-    content:
-      '멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다! 멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다! 멋짐이 폭발한다 개발자라면 이제는 꼭 배워야 하는 내용ㅋㅋ 이걸 모르는 개발자가 키보드보다 싸다!',
-    comment: 5,
-    like: 60,
-    view: 100,
-  },
-];

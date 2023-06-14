@@ -1,113 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import * as Style from './styledComponents/MyPageProfileStyle';
 import profileListData from './data/profileListData';
+
 const URL = process.env.REACT_APP_URL;
 
 const ProfileList = () => {
-  const [mySkillList, setMySkillList] = useState([]);
-  const [myCareerList, setMyCareerList] = useState([]);
-  const [myEduList, setMyEduList] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchMySkillList();
-    fetchMyCareerList();
-    fetchMyEduList();
-  }, []);
-
-  // 현재 나의 스킬 불러오기
-  const fetchMySkillList = async () => {
-    try {
-      const response = await fetch(`${URL}/api/skills/myskill`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
-        },
-      });
-      if (response) {
-        const data = await response.json();
-        setMySkillList(data);
-      } else {
-        throw new Error('Failed to fetch mySkillList');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // 현재 나의 커리어 불러오기
-  const fetchMyCareerList = async () => {
-    try {
-      const response = await fetch(`${URL}/api/careers`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
-        },
-      });
-
-      if (response) {
-        const data = await response.json();
-        setMyCareerList(data);
-        console.log(data);
-      } else {
-        throw new Error('Failed to fetch myCareerList');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // 현재 나의 교육 불러오기
-  const fetchMyEduList = async () => {
-    try {
-      const response = await fetch(`${URL}/api/educations`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
-        },
-      });
-
-      if (response) {
-        const data = await response.json();
-        setMyEduList(data);
-      } else {
-        throw new Error('Failed to fetch myCareerList');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  const queryClient = useQueryClient();
   const [urlList, setUrlList] = useState([
     {
-      name: '지우쓰의 Github',
+      name: '나의 Github',
       url: 'https://github.com/ziuss76',
     },
   ]);
 
-  // 경력 삭제 요청 핸들러
-  const handleRemoveCareer = async (careerId) => {
-    try {
-      const response = await fetch(`${URL}/api/careers/delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
-        },
-        body: JSON.stringify({ id: careerId }),
-      });
+  const navigate = useNavigate();
 
-      if (response) {
-        console.log(response);
-      } else {
-        throw new Error('Failed to delete career');
-      }
-    } catch (error) {
-      console.log(error);
+  // 현재 나의 스킬 불러오기
+  const { data: mySkillList, isLoading: isSkillLoading } = useQuery(
+    'mySkillList',
+    fetchMySkillList
+  );
+
+  // 현재 나의 커리어 불러오기
+  const { data: myCareerList, isLoading: isCareerLoading } = useQuery(
+    'myCareerList',
+    fetchMyCareerList
+  );
+
+  // 현재 나의 교육 불러오기
+  const { data: myEduList, isLoading: isEduLoading } = useQuery('myEduList', fetchMyEduList);
+
+  // 현재 나의 스킬 불러오기
+  async function fetchMySkillList() {
+    const response = await fetch(`${URL}/api/skills/myskill`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+      },
+    });
+    return response.json();
+  }
+
+  // 현재 나의 커리어 불러오기
+  async function fetchMyCareerList() {
+    const response = await fetch(`${URL}/api/careers`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+      },
+    });
+    return response.json();
+  }
+
+  // 현재 나의 교육 불러오기
+  async function fetchMyEduList() {
+    const response = await fetch(`${URL}/api/educations`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+      },
+    });
+    return response.json();
+  }
+
+  // 경력 삭제 요청 핸들러
+  async function handleRemoveCareer(careerId) {
+    const response = await fetch(`${URL}/api/careers/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+      },
+      body: JSON.stringify({ id: careerId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete career');
     }
-  };
+  }
+
+  // 교육 삭제 요청 핸들러
+  async function handleRemoveEdu(eduId) {
+    const response = await fetch(`${URL}/api/educations`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('userToken')}`,
+      },
+      body: JSON.stringify({ id: eduId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete edu');
+    }
+  }
+
+  const removeCareerMutation = useMutation(handleRemoveCareer, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('myCareerList');
+    },
+  });
+
+  const removeEduMutation = useMutation(handleRemoveEdu, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('myEduList');
+    },
+  });
 
   return (
     <Style.ListContainer>
@@ -115,7 +116,7 @@ const ProfileList = () => {
         {profileListData.map((item, index) => (
           <li key={index}>
             <h4>{item.title}</h4>
-            {index === 0 && mySkillList.length > 0 ? (
+            {index === 0 && !isSkillLoading && mySkillList.length > 0 ? (
               <SkillButtonContainer>
                 {mySkillList.map((mySkill, index) => (
                   <div className='badge' key={index}>
@@ -123,33 +124,43 @@ const ProfileList = () => {
                   </div>
                 ))}
               </SkillButtonContainer>
-            ) : index === 1 && myCareerList.length > 0 ? (
+            ) : index === 1 && !isCareerLoading && myCareerList.length > 0 ? (
               <CareerButtonContainer>
                 {myCareerList.map((myCareer, index) => (
                   <div className='badge' key={index}>
                     <H5>{`${myCareer.company_name} ${myCareer.position} ㅣ ${myCareer.content} ㅣ ${myCareer.totalWorkingDate}`}</H5>
                     <RemoveText
                       className='remove-text'
-                      onClick={() => handleRemoveCareer(myCareer.id)}
+                      onClick={() => removeCareerMutation.mutate(myCareer.id)}
                     >
                       x
                     </RemoveText>
                   </div>
                 ))}
               </CareerButtonContainer>
-            ) : index === 2 && myEduList.length > 0 ? (
-              <SkillButtonContainer>
+            ) : index === 2 && !isEduLoading && myEduList.length > 0 ? (
+              <CareerButtonContainer>
                 {myEduList.map((myEdu, index) => (
-                  <div className='eduinfo' key={index}>
-                    <H5>{`${myEdu.eduName} ${myEdu.program} ㅣ ${myEdu.content} ㅣ ${myEdu.totalStudyingDate}`}</H5>
+                  <div className='badge' key={index}>
+                    {myEdu.end_date === '' ? (
+                      <H5>{`${myEdu.name} ${myEdu.program} ㅣ ${myEdu.description} ㅣ ${myEdu.start_date} ~ 교육중`}</H5>
+                    ) : (
+                      <H5>{`${myEdu.name} ${myEdu.program} ㅣ ${myEdu.description} ㅣ ${myEdu.start_date} ~ ${myEdu.end_date}`}</H5>
+                    )}
+                    <RemoveText
+                      className='remove-text'
+                      onClick={() => removeEduMutation.mutate(myEdu.id)}
+                    >
+                      x
+                    </RemoveText>
                   </div>
                 ))}
-              </SkillButtonContainer>
+              </CareerButtonContainer>
             ) : index === 3 && urlList.length > 0 ? (
               <SkillButtonContainer>
                 {urlList.map((url, index) => (
                   <div className='badge' key={index}>
-                    <a href={url.url} target='_blank' key={index}>
+                    <a href={url.url} target='_blank' rel='noopener noreferrer' key={index}>
                       {url.name}
                     </a>
                   </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import LoginContainer from '../logIn/LogInContainer';
 import MyPageEditInput from '../myPage/styledComponents/MyPageEditInput';
 import MyPageEditSelect from '../myPage/styledComponents/MyPageEditSelect';
@@ -19,6 +19,7 @@ const MyPageEdit = () => {
   const [content, setContent] = useState('');
   const [isCurrentlyEmployed, setIsCurrentlyEmployed] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // useMutation POST 요청 선언
   const createCareerMutation = useMutation((careerData) =>
@@ -88,6 +89,7 @@ const MyPageEdit = () => {
 
     // Mutation POST 요청
     createCareerMutation.mutate(careerData);
+    queryClient.invalidateQueries('myCareerList');
   };
 
   return (
@@ -162,15 +164,15 @@ const MyPageEdit = () => {
         <label htmlFor='currentlyEmployed'>재직중</label>
       </CheckboxContainer>
 
-      <IntroTextContainter
-        onChange={(e) => {
-          e.preventDefault();
-          setContent(e.target.value);
-        }}
-        value={content}
-      >
+      <IntroTextContainter>
         <h3>어떤 일을 했나요?</h3>
-        <textarea placeholder='담당한 업무, 프로젝트 등을 소개해주세요'></textarea>
+        <textarea
+          placeholder='담당한 업무, 프로젝트 등을 소개해주세요'
+          onChange={(e) => {
+            setContent(e.target.value);
+          }}
+          value={content}
+        ></textarea>
       </IntroTextContainter>
 
       <ButtonContainer>
