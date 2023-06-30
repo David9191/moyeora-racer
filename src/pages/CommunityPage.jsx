@@ -18,7 +18,7 @@ const CommunityPage = () => {
 
   const fetchPosts = async () => {
     const response = await fetch(
-      `${BASE_URL}/api/boards/${selectedCategoryId}`,
+      `${BASE_URL}/api/boards/${selectedCategoryId}?page=0&size=100`,
       {
         headers: {
           authorization: `Bearer ${sessionStorage.getItem('userToken')}`
@@ -31,12 +31,22 @@ const CommunityPage = () => {
     }
 
     const result = await response.json();
-    return result;
+    return result.objArr;
   };
 
   const { data, isLoading, isError, error } = useQuery(
     ['posts', selectedCategoryId],
-    fetchPosts
+    fetchPosts,
+    {
+      // 페이지네이션을 위한 query key 변경
+      getNextPageParam: (lastPage, allPages) => {
+        // 현재 페이지가 마지막 페이지가 아니라면 다음 페이지 번호를 반환하고,
+        // 마지막 페이지라면 null을 반환하여 페이지네이션을 종료.
+        return lastPage.currentPage < lastPage.totalPages
+          ? lastPage.currentPage + 1
+          : null;
+      }
+    }
   );
 
   if (isError) {
